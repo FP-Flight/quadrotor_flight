@@ -79,3 +79,7 @@ Px4 全程运行在 offboard 模式下，RC的数据直接在quadrotor_fight_con
 | CH5 | Command mode |
 | CH7 | Reboot MCU |
 
+## 无人机状态监测
+
+## 其他
+控制频率默认是100hz
