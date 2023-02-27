@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>quadrotor_fight_control</name>
+  <name>quadrotor_flight_control</name>
   <version>0.0.0</version>
-  <description>The quadrotors_fight_control package</description>
+  <description>The quadrotors_flight_control package</description>
   <maintainer email="ll@todo.todo">ll</maintainer>
   <license>TODO</license>
 
