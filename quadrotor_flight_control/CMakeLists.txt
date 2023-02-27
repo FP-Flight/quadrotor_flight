@@ -64,7 +64,7 @@ src/controller.cpp
 src/PX4CtrlFSM.cpp
 src/PX4CtrlParam.cpp
 )
-# add_dependencies(${PROJECT_NAME}_node uav_utils)
+add_dependencies(${PROJECT_NAME}_node quadrotor_msgs_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
