@@ -63,6 +63,11 @@ src/input.cpp
 src/controller.cpp
 src/PX4CtrlFSM.cpp
 src/PX4CtrlParam.cpp
+
+src/battery.cpp
+src/imu.cpp
+src/odom.cpp
+
 )
 add_dependencies(${PROJECT_NAME}_node quadrotor_msgs_generate_messages_cpp)
 

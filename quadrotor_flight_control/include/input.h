@@ -52,36 +52,9 @@ public:
   bool is_received(const ros::Time &now_time);
 };
 
-class Odom_Data_t
-{
-public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  Eigen::Vector3d p;
-  Eigen::Vector3d v;
-  Eigen::Quaterniond q;
-  Eigen::Vector3d w;
 
-  nav_msgs::Odometry msg;
-  ros::Time rcv_stamp;
-  bool recv_new_msg;
 
-  Odom_Data_t();
-  void feed(nav_msgs::OdometryConstPtr pMsg);
-};
 
-class Imu_Data_t
-{
-public:
-  Eigen::Quaterniond q;
-  Eigen::Vector3d w;
-  Eigen::Vector3d a;
-
-  sensor_msgs::Imu msg;
-  ros::Time rcv_stamp;
-
-  Imu_Data_t();
-  void feed(sensor_msgs::ImuConstPtr pMsg);
-};
 
 class State_Data_t
 {
@@ -120,19 +93,7 @@ public:
   void feed(quadrotor_msgs::PositionCommandConstPtr pMsg);
 };
 
-class Battery_Data_t
-{
-public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  double volt{0.0};
-  double percentage{0.0};
 
-  sensor_msgs::BatteryState msg;
-  ros::Time rcv_stamp;
-
-  Battery_Data_t();
-  void feed(sensor_msgs::BatteryStateConstPtr pMsg);
-};
 
 class Takeoff_Land_Data_t
 {

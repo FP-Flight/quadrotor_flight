@@ -1,7 +1,11 @@
 #include <ros/ros.h>
 #include "PX4CtrlFSM.h"
 #include <signal.h>
+#include <std_msgs/Float32.h>
+#include <jsk_rviz_plugins/OverlayText.h>
 
+ros::Publisher voltage_pub;
+ros::Publisher status_pub;
 void mySigintHandler(int sig)
 {
     ROS_INFO("[PX4Ctrl] exit...");
@@ -85,6 +89,9 @@ int main(int argc, char *argv[])
     fsm.arming_client_srv = nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
     fsm.reboot_FCU_srv = nh.serviceClient<mavros_msgs::CommandLong>("/mavros/cmd/command");
 
+    voltage_pub = nh.advertise<std_msgs::Float32>("/Display/voltage",10);
+    status_pub = nh.advertise<jsk_rviz_plugins::OverlayText>("/Display/status",10);
+
     ros::Duration(0.5).sleep();
 
     if (param.takeoff_land.no_RC)
@@ -114,11 +121,52 @@ int main(int argc, char *argv[])
         if (trials++ > 5)
             ROS_ERROR("Unable to connnect to PX4!!!");
     }
-
+    ROS_INFO("connnect to PX4");
     ros::Rate r(param.ctrl_freq_max);
+    int times_display = 0;
     while (ros::ok())
     {
         r.sleep();
+        times_display++;
+        if(times_display>50){
+            times_display = 0;
+            std_msgs::Float32 voltage_text;
+            voltage_text.data = fsm.bat_data.volt;
+            voltage_pub.publish(voltage_text);
+        }
+        PX4CtrlFSM::State_t state = fsm.get_state();
+        jsk_rviz_plugins::OverlayText text;
+        text.width = 400;
+        text.height = 100;
+        text.left = 10;
+        text.top = 10;
+        text.text_size = 12;
+        text.line_width = 2;
+        text.font = "DejaVu Sans Mono";
+
+        switch (state)
+        {
+        case  PX4CtrlFSM::State_t::MANUAL_CTRL:
+            text.text = "status:[MANUAL_CTRL]";
+            break;
+        case  PX4CtrlFSM::State_t::AUTO_HOVER:
+            text.text = "status:[AUTO_HOVER]";
+            break;
+        case  PX4CtrlFSM::State_t::CMD_CTRL:
+            text.text = "status:[CMD_CTRL]";
+            break;
+        case  PX4CtrlFSM::State_t::AUTO_TAKEOFF:
+            text.text = "status:[AUTO_TAKEOFF]";
+            break;
+        case  PX4CtrlFSM::State_t::AUTO_LAND:
+            text.text = "status:[AUTO_LAND]";
+            break;            
+        default:
+            text.text = "This is OverlayText plugin.";
+            break;
+        }
+        status_pub.publish(text);
+
         ros::spinOnce();
         fsm.process(); // We DO NOT rely on feedback as trigger, since there is no significant performance difference through our test.
     }

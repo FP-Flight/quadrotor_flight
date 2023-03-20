@@ -110,6 +110,7 @@ void PX4CtrlFSM::process()
 							break;
 						}
 					}
+					// TODO: break seems useless
 					break;
 				}
 			}
@@ -118,7 +119,7 @@ void PX4CtrlFSM::process()
 			controller.resetThrustMapping();
 			set_start_pose_for_takeoff_land(odom_data);
 			toggle_offboard_mode(true);				  // toggle on offboard before arm
-			for (int i = 0; i < 10 && ros::ok(); ++i) // wait for 0.1 seconds to allow mode change by FMU // mark
+			for (int i = 0; i < 10 && ros::ok(); ++i) // for 0.1 seconds to allow mode change by FMU // mark
 			{
 				ros::Duration(0.01).sleep();
 				ros::spinOnce();
@@ -147,6 +148,7 @@ void PX4CtrlFSM::process()
 
 	case AUTO_HOVER:
 	{
+
 		if (!rc_data.is_hover_mode || !odom_is_received(now_time))
 		{
 			state = MANUAL_CTRL;
@@ -154,8 +156,10 @@ void PX4CtrlFSM::process()
 
 			ROS_WARN("[px4ctrl] AUTO_HOVER(L2) --> MANUAL_CTRL(L1)");
 		}
+		// cmd_is_received is not cmd_mode_is reecived
 		else if (rc_data.is_command_mode && cmd_is_received(now_time))
 		{
+
 			if (state_data.current_state.mode == "OFFBOARD")
 			{
 				state = CMD_CTRL;

@@ -11,6 +11,10 @@
 #include <mavros_msgs/CommandBool.h>
 
 #include "input.h"
+
+#include "odom.h"
+#include "battery.h"
+#include "imu.h"
 // #include "ThrustCurve.h"
 #include "controller.h"
 

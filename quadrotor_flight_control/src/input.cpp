@@ -41,6 +41,7 @@ void RC_Data_t::feed(mavros_msgs::RCInConstPtr pMsg)
 
     check_validity();
 
+    // just initial status
     if (!have_init_last_mode)
     {
         have_init_last_mode = true;
@@ -58,11 +59,13 @@ void RC_Data_t::feed(mavros_msgs::RCInConstPtr pMsg)
     }
 
     // 1
+
+    // "enter_hover_mode" is a edge 
     if (last_mode < API_MODE_THRESHOLD_VALUE && mode > API_MODE_THRESHOLD_VALUE)
         enter_hover_mode = true;
     else
         enter_hover_mode = false;
-
+    // "is_hover_mode" is current RC mode
     if (mode > API_MODE_THRESHOLD_VALUE)
         is_hover_mode = true;
     else
@@ -116,88 +119,7 @@ bool RC_Data_t::check_centered()
     return centered;
 }
 
-Odom_Data_t::Odom_Data_t()
-{
-    rcv_stamp = ros::Time(0);
-    q.setIdentity();
-    recv_new_msg = false;
-};
 
-void Odom_Data_t::feed(nav_msgs::OdometryConstPtr pMsg)
-{
-    ros::Time now = ros::Time::now();
-
-    msg = *pMsg;
-    rcv_stamp = now;
-    recv_new_msg = true;
-
-    uav_utils::extract_odometry(pMsg, p, v, q, w);
-
-// #define VEL_IN_BODY
-#ifdef VEL_IN_BODY /* Set to 1 if the velocity in odom topic is relative to current body frame, not to world frame.*/
-    Eigen::Quaternion<double> wRb_q(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z);
-    Eigen::Matrix3d wRb = wRb_q.matrix();
-    v = wRb * v;
-
-    static int count = 0;
-    if (count++ % 500 == 0)
-        ROS_WARN("VEL_IN_BODY!!!");
-#endif
-
-    // check the frequency
-    static int one_min_count = 9999;
-    static ros::Time last_clear_count_time = ros::Time(0.0);
-    if ( (now - last_clear_count_time).toSec() > 1.0 )
-    {
-        if ( one_min_count < 100 )
-        {
-            ROS_WARN("ODOM frequency seems lower than 100Hz, which is too low!");
-        }
-        one_min_count = 0;
-        last_clear_count_time = now;
-    }
-    one_min_count ++;
-}
-
-Imu_Data_t::Imu_Data_t()
-{
-    rcv_stamp = ros::Time(0);
-}
-
-void Imu_Data_t::feed(sensor_msgs::ImuConstPtr pMsg)
-{
-    ros::Time now = ros::Time::now();
-
-    msg = *pMsg;
-    rcv_stamp = now;
-
-    w(0) = msg.angular_velocity.x;
-    w(1) = msg.angular_velocity.y;
-    w(2) = msg.angular_velocity.z;
-
-    a(0) = msg.linear_acceleration.x;
-    a(1) = msg.linear_acceleration.y;
-    a(2) = msg.linear_acceleration.z;
-
-    q.x() = msg.orientation.x;
-    q.y() = msg.orientation.y;
-    q.z() = msg.orientation.z;
-    q.w() = msg.orientation.w;
-
-    // check the frequency
-    static int one_min_count = 9999;
-    static ros::Time last_clear_count_time = ros::Time(0.0);
-    if ( (now - last_clear_count_time).toSec() > 1.0 )
-    {
-        if ( one_min_count < 100 )
-        {
-            ROS_WARN("IMU frequency seems lower than 100Hz, which is too low!");
-        }
-        one_min_count = 0;
-        last_clear_count_time = now;
-    }
-    one_min_count ++;
-}
 
 State_Data_t::State_Data_t()
 {
@@ -251,45 +173,7 @@ void Command_Data_t::feed(quadrotor_msgs::PositionCommandConstPtr pMsg)
     yaw_rate = msg.yaw_dot;
 }
 
-Battery_Data_t::Battery_Data_t()
-{
-    rcv_stamp = ros::Time(0);
-}
 
-void Battery_Data_t::feed(sensor_msgs::BatteryStateConstPtr pMsg)
-{
-
-    msg = *pMsg;
-    rcv_stamp = ros::Time::now();
-
-    double voltage = 0;
-    for (size_t i = 0; i < pMsg->cell_voltage.size(); ++i)
-    {
-        voltage += pMsg->cell_voltage[i];
-    }
-    volt = 0.8 * volt + 0.2 * voltage; // Naive LPF, cell_voltage has a higher frequency
-
-    // volt = 0.8 * volt + 0.2 * pMsg->voltage; // Naive LPF
-    percentage = pMsg->percentage;
-
-    static ros::Time last_print_t = ros::Time(0);
-    if (percentage > 0.05)
-    {
-        if ((rcv_stamp - last_print_t).toSec() > 10)
-        {
-            ROS_INFO("[px4ctrl] Voltage=%.3f, percentage=%.3f", volt, percentage);
-            last_print_t = rcv_stamp;
-        }
-    }
-    else
-    {
-        if ((rcv_stamp - last_print_t).toSec() > 1)
-        {
-            // ROS_ERROR("[px4ctrl] Dangerous! voltage=%.3f, percentage=%.3f", volt, percentage);
-            last_print_t = rcv_stamp;
-        }
-    }
-}
 
 Takeoff_Land_Data_t::Takeoff_Land_Data_t()
 {
@@ -304,4 +188,5 @@ void Takeoff_Land_Data_t::feed(quadrotor_msgs::TakeoffLandConstPtr pMsg)
 
     triggered = true;
     takeoff_land_cmd = pMsg->takeoff_land_cmd;
+    ROS_INFO_STREAM("triggered "<<triggered);
 }

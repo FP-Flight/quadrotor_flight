@@ -13,6 +13,10 @@
 #include "input.h"
 #include <Eigen/Dense>
 
+#include "odom.h"
+#include "battery.h"
+#include "imu.h"
+
 struct Desired_State_t
 {
 	Eigen::Vector3d p;
