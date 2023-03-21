@@ -11,13 +11,16 @@ R1 = tf_my.euler2rotate_maxtrix((yaw, pitch, roll), "zyx")
 q1 = tf_my.rotation_matrix2quaternion(R1)
 def odom_cb(odometry):
     global R1,q1
-    postion = np.array([
+    position = np.array([
         odometry.pose.pose.position.x,
         odometry.pose.pose.position.y,
         odometry.pose.pose.position.z
     ])
-
-
+    linear_v = np.array([
+        odometry.twist.twist.linear.x,
+        odometry.twist.twist.linear.y,
+        odometry.twist.twist.linear.z
+    ])
 
     q2 = np.array([
                 odometry.pose.pose.orientation.w,
@@ -27,17 +30,21 @@ def odom_cb(odometry):
     # 方向居然不一样
     q_new = tf_my.quaternion_multiply(q2,q1)
     R_new = tf_my.quaternion2rotation_matrix(q_new)
-    postion_new = np.matmul(R_new,postion)
+    linear_v_new = np.matmul(np.transpose(R_new),linear_v)
+    position_new = np.matmul(np.transpose(R_new),position)
+
     out_odom.header.frame_id = odometry.header.frame_id
+    # out_odom.header.frame_id = "world"
+
     out_odom.header.stamp = odometry.header.stamp
-    out_odom.child_frame_id = odometry.child_frame_id
-    out_odom.pose.pose.position.x = odometry.pose.pose.position.x
-    out_odom.pose.pose.position.y = odometry.pose.pose.position.y
-    out_odom.pose.pose.position.z = odometry.pose.pose.position.z
+    out_odom.child_frame_id = "body_px4"
+    out_odom.pose.pose.position.x = position[0]
+    out_odom.pose.pose.position.y = position[1]
+    out_odom.pose.pose.position.z = position[2]
     
-    # out_odom.pose.pose.position.x = postion_new[0]
-    # out_odom.pose.pose.position.y = postion_new[1]
-    # out_odom.pose.pose.position.z = postion_new[2]
+    out_odom.twist.twist.linear.x = linear_v[0]
+    out_odom.twist.twist.linear.y = linear_v[1]
+    out_odom.twist.twist.linear.z = linear_v[2]
 
     out_odom.pose.pose.orientation.w = q_new[0] 
     out_odom.pose.pose.orientation.x = q_new[1]
