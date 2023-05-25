@@ -2,12 +2,9 @@
 
 	<node pkg="quadrotor_flight_control" type="quadrotor_flight_control_node" name="px4ctrl" output="screen">
 		<!-- <remap from="~odom" to="/vicon_imu_ekf_odom" /> -->	
-		<remap from="~odom" to="/Odometry" />
-		<remap from="~cmd" to="/position_cmd" />
+		<remap from="~odom" to="/quadrotor_control/odom" />
+		<remap from="~cmd" to="/drone_0_planning/pos_cmd" />
 
         <rosparam command="load" file="$(find quadrotor_flight_control)/config/ctrl_param_fpv.yaml" />
-	</node>
-	<include file="$(find mavros)/launch/px4.launch">
-		<arg name="log_output" value="log"/>
-	</include> 
+	</node> 
 </launch>
