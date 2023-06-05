@@ -3,7 +3,7 @@
 	<node pkg="quadrotor_flight_control" type="quadrotor_flight_control_node" name="px4ctrl" output="screen">
 		<!-- <remap from="~odom" to="/vicon_imu_ekf_odom" /> -->	
 		<remap from="~odom" to="/quadrotor_control/odom" />
-		<remap from="~cmd" to="/drone_0_planning/pos_cmd" />
+		<remap from="~cmd" to="/drone_3_planning/pos_cmd" />
 
         <rosparam command="load" file="$(find quadrotor_flight_control)/config/ctrl_param_fpv.yaml" />
 	</node> 

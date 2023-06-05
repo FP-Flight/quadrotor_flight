@@ -76,3 +76,17 @@ target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
  )
 
+add_executable(${PROJECT_NAME}_offboard src/offboard.cpp
+src/input.cpp
+src/controller.cpp
+src/PX4CtrlFSM.cpp
+src/PX4CtrlParam.cpp
+
+src/battery.cpp
+src/imu.cpp
+src/odom.cpp
+
+)## Specify libraries to link a library or executable target against
+target_link_libraries(${PROJECT_NAME}_offboard
+   ${catkin_LIBRARIES}
+ )
